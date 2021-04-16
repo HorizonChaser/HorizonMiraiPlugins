@@ -4,11 +4,17 @@ plugins {
     id 'net.mamoe.mirai-console' version '2.0.0'
 }
 
+targetCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_11
+
+
+
 group = '0010'
 
 repositories {
     maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     maven { url 'https://mirrors.huaweicloud.com/repository/maven' }
+    maven { url = uri("https://dl.bintray.com/karlatemp/misc") }
     mavenCentral()
     jcenter()
 }

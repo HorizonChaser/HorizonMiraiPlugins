@@ -6,7 +6,7 @@ import net.mamoe.mirai.utils.BotConfiguration;
 
 public class RunMirai {
     public static void main(String[] args) {
-        Bot bot = BotFactory.INSTANCE.newBot(123456, "password");
+        Bot bot = BotFactory.INSTANCE.newBot(878523110, "Pi!=31415926#QQ");
         bot.login();
     }
 }
@@ -14,7 +14,7 @@ public class RunMirai {
 class WithConfiguration1 {
     public static void main(String[] args) {
         // 使用自定义配置
-        Bot bot = BotFactory.INSTANCE.newBot(123456, "password", new BotConfiguration() {{
+        Bot bot = BotFactory.INSTANCE.newBot(878523110, "Pi!=31415926#QQ", new BotConfiguration() {{
             fileBasedDeviceInfo(); // 使用 device.json 存储设备信息
 //            setProtocol(MiraiProtocol.ANDROID_PAD); // 切换协议
         }});
