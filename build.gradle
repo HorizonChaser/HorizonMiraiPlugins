@@ -9,7 +9,7 @@ sourceCompatibility = JavaVersion.VERSION_11
 
 
 
-group = '0010'
+group = 'SauceNAO Plugin'
 
 repositories {
     maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }

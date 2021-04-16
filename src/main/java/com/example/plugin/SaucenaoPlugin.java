@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class SaucenaoPlugin extends JavaPlugin {
@@ -22,7 +23,7 @@ public class SaucenaoPlugin extends JavaPlugin {
     private SaucenaoPlugin() {
         super(new JvmPluginDescriptionBuilder(
                         "com.example.plugin.SaucenaoPlugin", // 需要遵循语法规定，不知道写什么的话就写主类名吧
-                        "0.0.1" // 同样需要遵循语法规定
+                        "1.0.1" // 同样需要遵循语法规定
                 )
                         .author("Horizon")
                         .name("SaucenaoPlugin")
@@ -46,25 +47,23 @@ public class SaucenaoPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         GlobalEventChannel.INSTANCE.subscribeAlways(GroupMessageEvent.class, (GroupMessageEvent event) -> {
+
+            //TODO: Quota support for all users
+            //TODO: Blacklist
+
             String content = event.getMessage().contentToString();
             long sender = event.getSender().getId();
             System.out.println(content);
 
             if (sender == 1783861062L && content.contains("出处")) {
-                File statFile = new File(CommonDefinition.statFileName);
+                File statFile = new File(CommonDefinition.fileRootPath + CommonDefinition.statFileName);
                 try {
                     BufferedWriter statFileWriter = new BufferedWriter(new FileWriter(statFile));
-                    //IMPROVE
-                    //TimeStamp should not contain "_"
-                    statFileWriter.append(FileUtil.getTimeStamp() + "," + sender);
+                    statFileWriter.append(String.valueOf(new Date().getTime())).append(",").append(String.valueOf(sender));
                     statFileWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                event.getSubject().sendMessage("在找了在找了, 稍等");
-                //TEST
-                System.out.println("在找了");
 
                 MessageChain chain = event.getMessage();
                 Image image = chain.get(Image.Key);
@@ -77,8 +76,9 @@ public class SaucenaoPlugin extends JavaPlugin {
                         e.printStackTrace();
                     }
                 }
+                event.getSubject().sendMessage("在找了在找了, 稍等");
 
-                //TEST
+                //DBG
                 System.out.println("[New Req] " + sender + " " + imageName);
 
                 String imagePath = new File(imageName).getAbsolutePath();
@@ -89,14 +89,14 @@ public class SaucenaoPlugin extends JavaPlugin {
                     pythonProc = Runtime.getRuntime().exec("python " + CommonDefinition.fileRootPath + "saucenao.py " + imagePath);
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pythonProc.getInputStream()));
                     pythonProc.waitFor();
-                    String res = bufferedReader.readLine();
-                    while (res != null) {
-                        output.add(res);
+                    String buffer = bufferedReader.readLine();
+                    while (buffer != null) {
+                        output.add(buffer);
 
-                        //TEST
-                        System.out.println(res);
+                        //DBG
+                        System.out.println(buffer);
 
-                        res = bufferedReader.readLine();
+                        buffer = bufferedReader.readLine();
                     }
                     returnVal = pythonProc.exitValue();
                 } catch (IOException | InterruptedException e) {
@@ -105,28 +105,24 @@ public class SaucenaoPlugin extends JavaPlugin {
 
                 if (returnVal == 403) {
                     event.getGroup().sendMessage("⚠ 出了点儿小问题, 喵酱的 API Key 被服务器拒绝了, 快去找 Horizon");
-
-                    //TEST
-                    System.out.println("⚠ 出了点儿小问题, 喵酱的 API Key 被服务器拒绝了, 快去找 Horizon");
                     return;
                 }
                 if (returnVal != 200 && returnVal != 0) {
                     event.getGroup().sendMessage("图片没 Post 到服务器, 要喵酱说这锅得归校园网背🔨");
-
-                    //TEST
-                    System.out.println("图片没 Post 到服务器, 要喵酱说这锅得归校园网背🔨");
                     return;
                 }
 
                 shortLimit = Integer.parseInt(output.get(0));
                 longLimit = Integer.parseInt(output.get(1));
                 double similarity = Double.parseDouble(output.get(2));
-                String database = output.get(3), memberName = null, title = null, fileName = null, url = null;
+                String database = output.get(3), memberName = null,
+                        title = null, fileName = null, url = null, pid = null;
                 if (database.equals("Pixiv")) {
                     memberName = output.get(4);
                     title = output.get(5);
                     fileName = output.get(6);
                     url = output.get(7);
+                    pid = output.get(8);
                 } else {
                     url = output.get(4);
                 }
@@ -137,7 +133,6 @@ public class SaucenaoPlugin extends JavaPlugin {
                     event.getGroup().sendMessage(messages);
                     //TEST
                     System.out.println(messages.contentToString());
-
                     return;
                 }
 
@@ -146,11 +141,10 @@ public class SaucenaoPlugin extends JavaPlugin {
                 response.append("相似度: ").append(similarity).append("%\n");
                 if (database.equals("Pixiv")) {
                     response.append("画师: ").append(memberName).append("\n");
-                    response.append("题目: ").append(title).append("\n");
-                    //TODO
-                    //pid
-                    //response.append("pid: ").append();
+                    response.append("标题: ").append(title).append("\n");
+                    response.append("pid: ").append(pid);
                 }
+                // TODO
                 // response.append("link: ").append(url);
                 Image upload = ExternalResource.uploadAsImage(
                         new File(CommonDefinition.fileRootPath + fileName), event.getSubject());
@@ -158,8 +152,6 @@ public class SaucenaoPlugin extends JavaPlugin {
                 event.getGroup().sendMessage(response.toString());
                 MessageChain messages = new PlainText("").plus(upload);
                 event.getGroup().sendMessage(messages);
-                //TEST
-                System.out.println(messages.contentToString());
             }
         });
     }
