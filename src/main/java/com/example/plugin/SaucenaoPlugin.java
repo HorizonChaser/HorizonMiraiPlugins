@@ -47,19 +47,19 @@ public class SaucenaoPlugin extends PluginSystemBase {
     @Override
     public void onEnable() {
         GlobalEventChannel.INSTANCE.subscribeAlways(MessageEvent.class, (MessageEvent event) -> {
-
-            //TODO: Quota support for all users
             //TODO: Blacklist
 
             String content = event.getMessage().contentToString();
             long sender = event.getSender().getId();
-            System.out.println(content);
+            MessageChain chain = event.getMessage();
+            Image image = chain.get(Image.Key);
 
-            if (content.contains("出处")) {
+            if (content.contains("出处") && image != null) {
                 File statFile = new File(CommonDefinition.fileRootPath + CommonDefinition.statFileName);
                 try {
                     BufferedWriter statFileWriter = new BufferedWriter(new FileWriter(statFile));
-                    statFileWriter.append(String.valueOf(new Date().getTime())).append(",").append(String.valueOf(sender));
+                    statFileWriter.append(String.valueOf(new Date().getTime())).append(",").
+                            append(String.valueOf(sender)).append("\n");
                     statFileWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -78,19 +78,18 @@ public class SaucenaoPlugin extends PluginSystemBase {
                     return;
                 }
 
-                MessageChain chain = event.getMessage();
-                Image image = chain.get(Image.Key);
-                String imageName = CommonDefinition.fileRootPath + FileUtil.getTimeStamp() + ".jpg";
+                String imageName = CommonDefinition.fileRootPath + FileUtil.getTimeStampString() + ".jpg";
                 if (image != null) {
                     try {
                         FileUtil.download(Image.queryUrl(image), imageName);
                         event.getSubject().sendMessage(new At(sender).
-                                plus(" 收到啦\n你的短上限还剩" + responseInfo.remainShort
-                                        + "\n你的长上限还剩" + responseInfo.remainLong));
+                                plus(" 收到啦\n你的短上限还剩 " + responseInfo.remainShort
+                                        + "\n你的长上限还剩 " + responseInfo.remainLong));
                     } catch (Exception e) {
                         System.out.println("[Error] Failed to download " + imageName);
-                        event.getSubject().sendMessage("校园网又又又又出错了, 图没下下来...要不重发一下?");
+                        event.getSubject().sendMessage("校园网又又又又出错了, 图没下下来...要不稍等会儿重发一下?");
                         e.printStackTrace();
+                        return;
                     }
                 }
 
@@ -136,7 +135,7 @@ public class SaucenaoPlugin extends PluginSystemBase {
                         title = null, fileName = null, url = null, pid = null;
 
                 if (similarity < CommonDefinition.minSimilarity) {
-                    MessageChain messages = new PlainText("喵酱已经努力找了, 不过没有找到足够相似的")
+                    MessageChain messages = new PlainText("喵酱已经努力找了, 不过没有找到足够相似的\n或许你可以去Tineye搜搜")
                             .plus(new Face(Face.KUAI_KU_LE).plus(new At(sender)));
                     event.getSubject().sendMessage(messages);
                     return;
@@ -146,8 +145,8 @@ public class SaucenaoPlugin extends PluginSystemBase {
                     memberName = output.get(4);
                     title = output.get(5);
                     fileName = output.get(6);
-                    url = output.get(7);
-                    pid = output.get(8);
+                    url = output.get(8);
+                    pid = output.get(7);
                 } else {
                     url = output.get(4);
                 }

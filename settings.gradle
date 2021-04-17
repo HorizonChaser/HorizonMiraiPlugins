@@ -16,5 +16,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = '0010'
+rootProject.name = 'SauceNAO Plugin'
 

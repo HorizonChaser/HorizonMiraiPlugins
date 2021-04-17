@@ -15,10 +15,10 @@ public class FileUtil {
     /**
      * 根据 URL 下载文件
      * @param urlString URL
-     * @param filename 文件名
+     * @param filePath 文件名
      * @throws Exception 下载异常
      */
-    public static void download(@NotNull String urlString, @NotNull String filename) throws Exception {
+    public static void download(@NotNull String urlString, @NotNull String filePath) throws Exception {
         // 构造URL
         URL url = new URL(urlString);
         // 打开连接
@@ -27,7 +27,7 @@ public class FileUtil {
         // 1K的数据缓冲
         byte[] bs = new byte[1024];
         int len;
-        File file = new File(filename);
+        File file = new File(filePath);
 
         if(!file.exists()){
             file.createNewFile();
@@ -45,7 +45,7 @@ public class FileUtil {
      * 返回时间戳字符串
      * @return 时间戳字符串 yyyy-MM-dd HH:mm:ss
      */
-    public static String getTimeStamp() {
+    public static String getTimeStampString() {
         return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
     }
 

@@ -8,7 +8,7 @@ import java.util.*;
 
 public class PluginSystemBase extends JavaPlugin {
     static int shortLimit = 1, longLimit = 10;
-    static long shortDuration = 40, longDuration = 60 * 60;
+    static long shortDuration = 30, longDuration = 60 * 60;
     static Map<Long, List<Long>> usageHistory = new HashMap<>();
 
     public enum RejectReason {
